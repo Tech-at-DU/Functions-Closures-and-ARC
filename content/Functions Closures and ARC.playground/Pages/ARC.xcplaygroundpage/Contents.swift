@@ -1,13 +1,13 @@
 /*:
- # Memory Management
+ # ARC: Memory Management
  
  ## Retain Counts
- Swift uses Automatic Reference Counting, or ARC, to manage when an instance is in kept in memory and what it gets deleted.
+ Swift uses **Automatic Reference Counting, or ARC,** to manage when an instance is in kept in memory and when it gets deleted.
  
  #How does it work
- Once an instance of a class is created, ARC will keep track of its reference count, or retain count. Let's look at an example:
+ Once an instance of a class is created, ARC will keep track of its **reference count, or retain count.** Let's look at an example:
  
- We create a class called Person and add an initizalizer and a deinit method as well as a single property.
+ We create a class called Person and add an initizalizer, a deinit method, and a single property `name`.
  */
 
 class Person {
@@ -37,20 +37,20 @@ let eric = Person(name: "Eric")
 let jack = Person(name: "Jack")
 
 /*:
- Again, this new instance has a retain count of 1. Each instances have a retain count of one because each instance has one variable "pointing" at each instance.
+ Again, this new instance has a retain count of 1. Each instance has a retain count of 1 because each instance has one variable "pointing" at each instance.
  
- So now we saw how we **increment** a retain count, let's see how we decrement one
+ So now that we saw how to **increment** a retain count, let's see how we can decrement one.
  
  ## Decreameting a retain count
- We'll use the same two instances, `Person(name: "Eric")` and `Person(name: "Jack")`, and create a new variable and set it equal to `erick`.
+ We'll use the same two instances, `Person(name: "Eric")` and `Person(name: "Jack")`, and create a new variable and set it equal to `eric`.
  */
 
 var jacksBestFriend: Person? = eric
 
 /*:
-Any guesses on what the retain count is of the first instance?
+ Any guesses on what the retain count is of the first instance?
  
- It's two. The first instance, `Person(name: "Eric")`, now has two variables pointing to it. How is this possible?
+ It's 2. The first instance, `Person(name: "Eric")`, now has two variables pointing to it. How is this possible?
  
  On the previous line of code, we assign `jacksBestFriend` to equal `eric`. But, what happened under the hood is the variable, or pointer, `jacksBestFriend` now *points* to whatever `eric` *points to* which is the first instance, `Person(name: "Eric")`. Let's update `jacksBestFriend` to not point to `eric`:
  */
@@ -58,10 +58,10 @@ Any guesses on what the retain count is of the first instance?
 jacksBestFriend = nil
 
 /*:
- Now the retain count for `Person(name: "Eric")` is back to one since `eric` still points to that instance. Overall, the retain count for all instances depend on how many properties, variables, and constants are pointing to that instance.
-
- ## When do retain counts go to zero
- A common place for an instance's retain count to go to zero is local variables. Let's take a look:
+ Now the retain count for `Person(name: "Eric")` is back to 1 since `eric` still points to that instance. Overall, **the retain count for all instances depends on how many properties, variables, and constants are pointing to that instance.**
+ 
+ ## When do retain counts go to zero?
+ A common place for an instance's retain count to go to zero is via a local variable. Let's take a look:
  */
 
 func createPersonInstance() {
@@ -79,17 +79,21 @@ print("function call ends")
  
  ![deinit](./deinit.png)
  
- This is because the local variable is removed when the function that created the local variable fell out of scope.
+ This is because the **local variable is removed when the function that created the local variable fell out of scope.**
  
  Another common case is when you present a new view controller onto the screen a new instance of that view controller is initalized. But, when the screen goes away, by a back button for example, the view controller is then deinitialized.
  
- ## What is a reference type
- There are two kinds a type can be; either a **Reference Type** or a **Value Type**. Let's talk about reference types first.
+ ## Two Kinds of Types
+ Types come in two varieties:
+ - **Reference Type**
+ - **Value Type**
  
- ### What can be reference types
- In Swift, there are `classes`, `structs`, and `enums`. Classes are the only type that can be a reference type. All others, are value types. What does this mean in our code?
+ We'll cover both of these in-depth, as there are important differences between the two. Let's start with Reference Type.
  
- ### Functions, passed by value or pass by reference
+ ### Reference Types
+ In Swift, there are `classes`, `structs`, and `enums`. **Classes are the only type that can be a reference type. All others, are value types.** What does this mean in our code?
+ 
+ #### Functions, passed by value or pass by reference
  Let's look at the following code and see what's going on:
  */
 
@@ -102,29 +106,38 @@ func printDetailsOf(_ person: Person) {
 printDetailsOf(billy)
 
 /*:
- So, what's going on when we call the function `printDetailsOf`? Since, the variable billy points to an instance of a Person class, which is a reference type, the instance is passed by reference. Meaning, only the pointer is given to the function, the pointer that contains the instance in memory.
+ So, what's going on when we call the function `printDetailsOf`? Since the variable `billy` points to an instance of a Person class, which is a reference type, the instance is passed by reference. **Passing by reference means that only the pointer is given to the function.** The pointer that contains the instance is stored in memory.
  
  Similarly, when we created the variable `jacksBestFriend` previously, and set it equal to `eric`, `jacksBestFriend` was assigned a pointer to the same place in memory as `eric` which was `Person(name: "Eric")`.
  
+ ![eric diagram](./eric-diagram.png)
+ 
  ### Value Types
- Now, if `Person` was a value type instead, in other words a `struct` vs a `class`, different operations would occur in our two situations:
+ Now, if `Person` was a value type instead, in other words a `struct` vs a `class`, different operations would occur in our two previously discussed situations:
  
- In the first situation, the function would make a copy of `billy` therefore, copy the values of billy which would be the name.
+ In the first situation (above `billy` code), the function would make a copy of `billy`, which would therefore copy the values of `billy` (his name).
  
- In the second situation, again, the values would be copied. Once we assign `jacksBestFriend` to `eric`, `jacksBestFriend` would have its own copy of `eric`'s values. Let's look test that out:
+ In the second situation(`jacksBestFriend`), again, the values would be copied. Once we assign `jacksBestFriend` to `eric`, `jacksBestFriend` would have its own copy of `eric`'s values.
+ 
+ ![eric value diagram](./eric-value-diagram.png)
+ 
+ ### Reference Vs. Value
+ Let's go over some familiar examples using both reference and value types. First we'll take a look at using reference types:
  */
 
 //using reference types
 let molly = Person(name: "Molly")
-var erickBestFriend = molly
+var ericBestFriend = molly
 
 print("before changing the name: \(molly.name)")
-erickBestFriend.name = "Molls"
+ericBestFriend.name = "Molls"
 
 print("after changing the name: \(molly.name)")
 
 /*:
- Notice when we changed the name of `erickBestFriend` it changed the name of `molly`. This is because both `erickBestFriend` and `molly` point to the same instance.
+ Notice when we changed the name of `ericBestFriend` it changed the name of `molly`. This is because both `ericBestFriend` and `molly` point to the same instance because `Person` is a class (reference type).
+ 
+ ![molly reference](./molly-ref.png)
  
  Now, let's try this with a value type, `Customer`:
  */
@@ -147,6 +160,8 @@ print(bankCustomer.name)
 /*:
  Now in this case, notice how the value of `danny.name` remained the same. While, `bankCustomer.name` changed to the new name. This is because `bankCustomer` was a copy of `danny`
  
+ ![danny value](./danny-diagram.png)
+ 
  ## Retain Cycles
  ARC has its common challenges, one is a retain cycle. A retain cycle occurs when two instances point at each other. Let's see how that looks:
  
@@ -168,16 +183,19 @@ print(bankCustomer.name)
  
  ### The problem
  
- Here in the following graph, both variables `john` and `unit4A` no longer point to the instances `Person(name: "John Appleseed")` and `Apartment(unit: "4A")`. But, notice the two instances still point the each other. This is a problem. Since, each instance still has a retain count of 1, or not zero, they haven't been deinitalized from memory. In fact, both instances are unreachable.
+ Here in the following graph, both variables `john` and `unit4A` no longer point to the instances `Person(name: "John Appleseed")` and `Apartment(unit: "4A")`. But, notice the two instances still point to each other. **This is a problem, because each instance still has a retain count of 1 (instead of 0), therefore they haven't been deinitalized from memory.** In fact, both instances are unreachable:
  
  ![retain cycle-2](./referenceCycle03_2x.png)
  
- So, how do we fix this. We have to break the chain between the two instances somehow.
+ So, how do we fix this? We have to break the chain between the two instances somehow.
  
- By default, all variables, properties and constants are *strong* pointers. Meaning, they increament and decreament retain counts of instances each variable points to. This is where we can break the chain between two instances that point to each other.
+ By default, all variables, properties and constants are **strong pointers.** Meaning, they **increament and decreament retain counts of the instances each variable points to.** Since it is the default, `unit4a.tenant` and `john.apartment` are strongly pointing to each other, giving us the problem we're currently facing.
+ 
+ So we've identified where to break the chain, but how can we do it? If only there was a weaker pointer type...
  
  ## Weak References
- `weak` is a keyword that allows variables to point to an instnace but without increamenting its retain count. This makes the variable an optional. Since a weak variable does not increament the retain count, the instance the weak varible points to can be deinitialized, thus the variable can be `nil`.
+ Oh good, there is! **Weak pointers utilze the `weak` keyword to allow variables to point to an instance without increamenting its retain count. Since a weak variable does not increament the retain count, the instance the optional points to can be deinitialized, thus the variable can be `nil`.
+ - note: Any time a weak reference is used, this turns the variable into an `optional`. Weak variable and `optional` are considered synonymous.
  
  Let's try to fix our retain cycle using a weak variable:
  
@@ -187,7 +205,7 @@ print(bankCustomer.name)
  
  ![weak reference](./weakReference01_2x-1.png)
  
- - note: The variable, or pointer, from the apartment to the person is now a `weak` reference. Thus, the retain count for person is only one. The retain count for apartment is still two as it was perviously.
+ - note: The variable, or pointer, from the `apartment` to the `tenant` is now a `weak` reference. Thus, the retain count for `tenant` is only one. The retain count for `apartment` is still two as it was previously.
  
  Once the `john` variable is deleted, or no longer pointing at `Person(name: "John Appleseed")`, the Person instance's retain count goes from 1 to zero, thus the instance is removed from memory:
  
@@ -200,8 +218,36 @@ print(bankCustomer.name)
  ## Unowned References
  Unowned serves the same effect as `weak`, the retain count is not increamented or decreamented but this implicitly unwraps the optional for you. So, if you can guarentee that the instance an `unowned variable` points to will never be deinitalized when you use the unowned variable, then mark it as `unowned` vs `weak`.
  
- - important: Like force unwrapping an optional, if there is no value there, your app will crash. Thus, unowned variables are not used often.
+ - important: Like force unwrapping an optional, if there is no value there, your app will crash. **Thus, unowned variables are not used often.**
  */
+
+
+/*:
+ ## Summary
+ Throughout this tutorial (other than planning a fabulous event) we covered:
+ - How to write functions
+ - What a closure is and how they relate to functions (they are functions!)
+ - How we use closures and how they relate to higher order functions (HOFs)
+ - How we can optimize our closure code via shorthands
+ - How ARC works in regards to managing memory, the difference between reference/value types, and the differences between strong and weak references.
+ 
+ This gives us a solid foundation to build on as we continue to navigate the intricacies of building out projects in iOS!
+ */
+
+
+//: [Previous](@previous)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -212,5 +258,3 @@ print(bankCustomer.name)
 
 
 import Foundation
-
-//: [Previous](@previous)

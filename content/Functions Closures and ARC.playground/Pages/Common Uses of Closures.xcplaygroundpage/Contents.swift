@@ -2,45 +2,61 @@
 /*:
  # Common Uses of Closures
  
- One of the common uses of closures are high order functions on arrays. Methods like `sort`, `filter`, `reduce` and `map` use closures.
+ One of the common uses of closures are **high order functions (HOFs)** on arrays. HOFs are array functions that take a closure as input and return a new array that is the result of running the closure on the elements in the original array. `sort`, `filter`, `reduce` and `map` are examples of HOFs we'll be going over today.
  
- Let's look at how using some of these higher order functions and closures simplify some of our code.
+ Let's look at how using some of these HOFs and closures help to simplify some of our code.
  
  ## Filtering
- The filter method on an array will return a new array with elements that returned true in the given closure. The closure's signature looks like this:
-
+ The **filter** method on an array will **return a new array with elements that returned true in the given closure.** The closure's signature looks like this:
+ 
  ### Signature
-`(Element) -> Bool` where Element is the type of what's in the array
+ `(Element) -> Bool` where `Element` is the type of what's in the array
  
- In our case, Element is our Person struct since we have an array of Person.
- 
- In our example, we'll pass a closure that returns true if the guest.age >= 18. Otherwise, return false.
+ In our case, `Element` is our Guest struct since we have an array of Guest. Here's that Guest struct as a reminder:
+ */
+struct Guest: CustomDebugStringConvertible, Equatable {
+    var name: String
+    var age: Int
+    
+    var debugDescription: String {
+        return name
+    }
+}
+/*:
+ In our example, we'll pass a closure that returns true if the guest's age is greater than or equal to 18. Otherwise, return false.
  */
 
-let eric = Person(name: "Eric", age: 19)
-let sam = Person(name: "Sam", age: 17)
-let sara = Person(name: "Sara", age: 23)
-let charlie = Person(name: "Charlie", age: 18)
+let eric = Guest(name: "Eric", age: 19)
+let sam = Guest(name: "Sam", age: 17)
+let sara = Guest(name: "Sara", age: 23)
+let charlie = Guest(name: "Charlie", age: 18)
 
 let guestList = [sam, eric, sara, charlie]
 
+/*:
+ Below is how we would filter without the use of HOFs and closures:
+ */
+
 //filtering using our own function
-func guestsWhoAreEighteenYearsOfAgeOrOlder(guests: [Person]) -> [Person] {
-    var listOfGuestsWhoAreEighteenYearsOfAgeOrOlder: [Person] = []
+func adultGuests(guests: [Guest]) -> [Guest] {
+    var adultGuestList: [Guest] = []
     
     for aGuest in guests {
         if aGuest.age >= 18 {
-            listOfGuestsWhoAreEighteenYearsOfAgeOrOlder.append(aGuest)
+            adultGuestList.append(aGuest)
         }
     }
     
-    return listOfGuestsWhoAreEighteenYearsOfAgeOrOlder
+    return adultGuestList
 }
 
-let adultsList = guestsWhoAreEighteenYearsOfAgeOrOlder(guests: guestList)
+let adultsList = adultGuests(guests: guestList)
 
-//filtering using a high order function
-let adultsListFromFilter = guestList.filter { (aGuest: Person) in
+/*:
+ Now let's see how we can write our solution more efficiently through using HOFs and closures:
+ */
+//filtering using a HOF
+let adultsListFromFilter = guestList.filter { (aGuest: Guest) in
     if aGuest.age >= 18 {
         return true
     } else {
@@ -49,24 +65,24 @@ let adultsListFromFilter = guestList.filter { (aGuest: Person) in
 }
 
 /*:
- As you can tell, the filter method is much smaller than having to create our own function. Later in this lesson you'll learn how to reduce the code down to a single line a code!
+ As you can tell, the filter method is much smaller than having to create our own function. Later in this lesson you'll learn how to reduce the code down to a single line!
  
- Let's look at some more functions
+ Let's look at some more functions:
  
- ## Sort
- This too takes a closure but the sigature of this closure is different:
+ ## Sorted
+ Sorted takes an array and sorts its elements based on the provided closure. Its closure signature is different from what we previously saw with `Filter`:
  ### Signature
-
+ 
  `(Element, Element) -> Bool`.
  
- Sorted will compare two elements in the array and will use this closure to determin if the first element should be sorted before the second element.
+ **Sorted will compare two elements in the array and will use this closure to determin if the first element should be sorted before the second element.**
  
  The Closure will return true if its first argument should be ordered before its second argument.
  - note: you can reverse this by negating the logic thus sorting by descending order vs ascending
  */
 
 //sort by age, oldest is at the front of the array
-let sortedGuestList = guestList.sorted { (aGuest: Person, bGuest: Person) in
+let sortedGuestList = guestList.sorted { (aGuest: Guest, bGuest: Guest) in
     if aGuest.age >= bGuest.age {
         return true
     } else {
@@ -76,14 +92,14 @@ let sortedGuestList = guestList.sorted { (aGuest: Person, bGuest: Person) in
 
 /*:
  ## Map
- Think of the map function as a transforming function, convert an array of numbers into an array of strings, for example.
+ Map takes an array and applies Think of the **map function as a transforming function:** for example, you can use `map` to convert an array of numbers into an array of strings.
  
  ### Signature
-
+ 
  `(Element) -> Result` where Element is the type of the array, and Result is the new type you want to map each element into
  
- There's a bit more you have to define when using map on an array:
- 1. Define what the return type is for the given closure
+ There's a bit more you have to define upfront when using `map` on an array:
+ 1. Define what the return type is for the given closure (previously it could only have been `Bool`)
  1. Return a new instance of the same type as the closure's return type
  
  Let's create a list of lowercased strings and try to uppercase them (the return type of the closure can be the same type as the original array)
@@ -97,29 +113,31 @@ let upperCaseLetters = lowerCaseLetters.map { (aLetter: String) -> String in
 }
 
 /*:
- Another example, let's create two separate arrays. One contains the ages and the other contains only the names
+ As another example, let's create two separate arrays based on our previously created `guestList`:
+ - One contains the ages of guests
+ - The other contains only the names of guests
  - important: notice the return type of each closure matches the return value inside the closure's body
  */
 
-let listOfAgesFromGuests = guestList.map { (aPerson: Person) -> Int in
-    return aPerson.age
+let listOfAgesFromGuests = guestList.map { (aGuest: Guest) -> Int in
+    return aGuest.age
 }
 
-let listOfNamesFromGuests = guestList.map { (aPerson: Person) -> String in
-    return aPerson.name
+let listOfNamesFromGuests = guestList.map { (aGuest: Guest) -> String in
+    return aGuest.name
 }
 
 /*:
  ## Reduce
- This one is interesting. Reduce will, like all other high order functions, iterate through each element in the array but the goal is to reduce the array to a single new type.
+ This one is interesting. Reduce will, like all other HOFs, iterate through each element in the array but **the goal of reduce is to take the array and transform (or reduce) the array down into a single new type.**
  
- - example: you have an array of integers and you want to reduce the array into a sum, a single integer
+ For example, let's say you have an array of integers and you want to reduce the array into a sum, a single integer.
  
  ### Signature
  
- `(Result, Element) -> Result` where Element is the type of the array, and Result is the new type you want to reduce each element into
+ `(Result, Element) -> Result` where `Element` is the same type as the array, and `Result` is the new type you want to reduce each element into.
  
- The first argument is what the current reduced form looks like. The second argument is an element from the array.
+ The first argument is what the current reduced form looks like (always starts out nil). The second argument is an element from the array.
  
  Let's try this out by writing the first example out:
  */
@@ -132,11 +150,19 @@ let sumOfRandomNumbers = randomNumbers.reduce(0) { (sumSoFar, anInt) -> Int in
 }
 
 /*:
- This example reduces the array of guests into a sentence, or String, that contains the names of all the guests separated by a comma
+ Let's break this down a bit:
+ 1. `sumSoFar` is our running tally of our sum
+ 1. `anInt` represents an element from the array (in this case 2, 1, 6, 2, etc.)
+ 1. For each element (`anInt`) in the array, we're going to add it to our running tally of our sum (`sumSoFar`) and save it (`newSum`)
+ 1. `newSum` is an `Int` that gets returned after we've gone through every element in the array and calculated the sum
+ 
+ Pretty cool, right? We took an array and boiled it down into a single element! Let's apply this knowledge to our event that we've been working on. Arrays are great, but if we're looking at a guest list, a sentence is much more readable for most of us.
+ 
+ Let's reduce an array of guests into a sentence, or `String`, that contains the names of all the guests separated by a comma:
  */
 
-let namesCombined = guestList.reduce("") { (sentence, aPerson) -> String in
-    let newSentence = aPerson.name + ", " + sentence
+let namesCombined = guestList.reduce("") { (sentence, aGuest) -> String in
+    let newSentence = aGuest.name + ", " + sentence
     
     return newSentence
 }
@@ -161,7 +187,7 @@ let guestsToSort = [sam, eric, sara, charlie]
 //filter the guests to only include guests younger than 18 years
 
 
-//filter the numbers to only include event numbers
+//filter the numbers to only include even numbers
 let numbersToFilter = [2, 1, 1, 5, 6, 7, 10]
 
 
@@ -177,35 +203,11 @@ let numbersToMapIntoStrings = [2, 4, 5, 1, 2, 2]
 let numbersToSum = [-2, -5, -4, 5, -5, 5]
 
 
-
+/*:
+ We've learned more on how to use closures in our code, specifically with higher order functions, in order to clean up our code and make it more efficient.
+ 
+ But we can make it EVEN MORE efficient! In the next section we'll learn some shorthand for writing closures.
+ */
 //: [Previous](@previous) | [Next](@next)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-struct Person: CustomDebugStringConvertible {
-    var name: String
-    var age: Int
-    
-    var debugDescription: String {
-        return name
-    }
-}

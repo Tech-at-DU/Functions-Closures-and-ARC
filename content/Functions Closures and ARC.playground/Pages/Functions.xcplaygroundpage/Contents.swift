@@ -1,6 +1,17 @@
 
 /*:
  ![Make School Banner](./swift_banner.png)
+ # Learning Outcomes
+ 
+ By the end of this tutorial, you should be able to...
+ 
+ 1. Understand what a function is in Swift and how to write and call them.
+ 1. Describe what an instance method or class method is, and know when to use them.
+ 1. Understand what a closure is and how to write and call them.
+ 1. Know when it makes sense to use a closure in your projects.
+ 1. Describe how ARC manages instances in memory.
+ 1. Differentiate between reference and value types, and what it means to pass by reference vs value
+ 
  # Functions
  
  **Functions** are the building blocks of coding in any language. Coding functions have properties similar to functions you used in math classes:

@@ -41,7 +41,7 @@ let jack = Person(name: "Jack")
  
  So now that we saw how to **increment** a retain count, let's see how we can decrement one.
  
- ## Decreameting a retain count
+ ## Decrementing a retain count
  We'll use the same two instances, `Person(name: "Eric")` and `Person(name: "Jack")`, and create a new variable and set it equal to `eric`.
  */
 

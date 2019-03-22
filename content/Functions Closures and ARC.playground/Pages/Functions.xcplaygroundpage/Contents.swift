@@ -1,6 +1,12 @@
 
 /*:
- ![Make School Banner](./swift_banner.png)
+ # Why is this important?
+ 
+ Functions and Closures are a fundamental part of implementing iOS apps. They're the building blocks that we use for everything we do that isn't a Storyboard.
+ 
+ It's important to have these down in order to build more complex apps and work with more advanced resources going forward.
+ 
+ 
  # Learning Outcomes
  
  By the end of this tutorial, you should be able to...

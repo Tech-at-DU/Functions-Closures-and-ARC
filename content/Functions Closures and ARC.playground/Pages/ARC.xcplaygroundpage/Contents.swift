@@ -231,9 +231,11 @@ print(bankCustomer.name)
  - How we can optimize our closure code via shorthands
  - How ARC works in regards to managing memory, the difference between reference/value types, and the differences between strong and weak references.
 
- This gives us a solid foundation to build on as we continue to navigate the intricacies of building out projects in iOS!
+ This gives us a solid foundation to build on as we continue to navigate the intricacies of building out projects in iOS! As you go through your MOB course, reflect on these fundamentals and see how you build off of them going forward.
 
- ## Feedback and Review
+ ## Feedback and Review - 2 minutes
+ **We promise this won't take longer than 2 minutes!**
+ 
  Please take a moment to rate your understanding of learning outcomes from this tutorial, and how we can improve it via our [tutorial feedback form](https://goo.gl/forms/hPZCYMoFxEEIUfEo1)
  */
 

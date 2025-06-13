@@ -2,9 +2,7 @@
 /*:
  # Common Uses of Closures
  
- One of the common uses of closures are **high order functions (HOFs)** on arrays. HOFs are array functions that take a closure as input and return a new array that is the result of running the closure on the elements in the original array. `sort`, `filter`, `reduce` and `map` are examples of HOFs we'll be going over today.
- 
- Let's look at how using some of these HOFs and closures help to simplify some of our code.
+ A common place you’ll see closures is inside higher-order array functions (often called HOFs). A higher-order function takes another function or closure as an argument and returns a new value—usually a transformed array. On Array the key HOFs are map, filter, reduce, and sorted(by:); each accepts a closure you supply and produces a new array (or single value) based on the original elements.
  
  ## Filtering
  The **filter** method on an array will **return a new array with elements that returned true in the given closure.** The closure's signature looks like this:
@@ -37,7 +35,7 @@ let guestList = [sam, eric, sara, charlie]
  Below is how we would filter without the use of HOFs and closures:
  */
 
-//filtering using our own function
+// filter function using our own function
 func adultGuests(guests: [Guest]) -> [Guest] {
     var adultGuestList: [Guest] = []
     
@@ -53,35 +51,49 @@ func adultGuests(guests: [Guest]) -> [Guest] {
 let adultsList = adultGuests(guests: guestList)
 
 /*:
+ 
  Now let's see how we can write our solution more efficiently through using HOFs and closures:
+ 
  */
-//filtering using a HOF
+
+// filtering using a HOF
 let adultsListFromFilter = guestList.filter { (aGuest: Guest) in
-    if aGuest.age >= 18 {
-        return true
-    } else {
-        return false
-    }
+  return aGuest.age >= 18
 }
 
+
 /*:
- As you can tell, the filter method is much smaller than having to create our own function. Later in this lesson you'll learn how to reduce the code down to a single line!
  
- Let's look at some more functions:
- 
- ## Sorted
- Sorted takes an array and sorts its elements based on the provided closure. Its closure signature is different from what we previously saw with `Filter`:
- ### Signature
- 
- `(Element, Element) -> Bool`.
- 
- **Sorted will compare two elements in the array and will use this closure to determin if the first element should be sorted before the second element.**
- 
- The Closure will return true if its first argument should be ordered before its second argument.
- - note: you can reverse this by negating the logic thus sorting by descending order vs ascending
+ ### Re-written paragraph
+
+ ---
+
+ #### `sorted(by:)`
+
+ `sorted(by:)` returns **a new array whose elements are arranged according to the closure you provide**.
+ The closure’s signature is:
+
+ ```swift
+ (Element, Element) -> Bool
+ ```
+
+ For every pair of elements, Swift calls your closure and expects `true` if the **first argument should come before the second** in the final order. Using the standard “ascending” comparison is usually as simple as:
+
+ ```swift
+ let ascending = numbers.sorted(by: <)   // Same as .sorted()
+ ```
+
+ Want descending order? Flip the comparison:
+
+ ```swift
+ let descending = numbers.sorted(by: >)
+ ```
+
+ > **Tip:** `sorted(by:)` is non-mutating—it leaves the original array untouched and returns a new array. If you need in-place sorting, use `sort(by:)` instead.
+
  */
 
-//sort by age, oldest is at the front of the array
+// sort by age, oldest is at the front of the array
 let sortedGuestList = guestList.sorted { (aGuest: Guest, bGuest: Guest) in
     if aGuest.age >= bGuest.age {
         return true
@@ -91,18 +103,33 @@ let sortedGuestList = guestList.sorted { (aGuest: Guest, bGuest: Guest) in
 }
 
 /*:
- ## Map
- Map takes an array and applies Think of the **map function as a transforming function:** for example, you can use `map` to convert an array of numbers into an array of strings.
- 
+ ## `map(_:)`
+
+ Think of **`map`** as a *transformer*: it walks through a collection, applies the closure to every element, and returns a **new** array containing each transformed value.
+
  ### Signature
- 
- `(Element) -> Result` where Element is the type of the array, and Result is the new type you want to map each element into
- 
- There's a bit more you have to define upfront when using `map` on an array:
- 1. Define what the return type is for the given closure (previously it could only have been `Bool`)
- 1. Return a new instance of the same type as the closure's return type
- 
- Let's create a list of lowercased strings and try to uppercase them (the return type of the closure can be the same type as the original array)
+
+ ```swift
+ (Element) -> Result
+ ```
+
+ * **`Element`** – the type stored in the original array.
+ * **`Result`** – the type you want each element converted to (often—but not necessarily—the same as `Element`).
+
+ When you call `map` you must:
+
+ 1. Provide a closure whose return type is the `Result` you need.
+ 2. Ensure the closure returns something for **every** element; the new array is built from those return values.
+
+ Example — uppercase every string:
+
+ ```swift
+ let lower = ["apple", "banana", "cherry"]
+ let upper = lower.map { $0.uppercased() }   // ["APPLE", "BANANA", "CHERRY"]
+ ```
+
+ Here `Element` is `String` and `Result` is also `String`, but you could just as easily convert numbers to strings, models to view-models, and so on.
+
  */
 
 let lowerCaseLetters = ["a", "z", "b", "x", "c", "y"]
@@ -117,6 +144,8 @@ let upperCaseLetters = lowerCaseLetters.map { (aLetter: String) -> String in
  - One contains the ages of guests
  - The other contains only the names of guests
  - important: notice the return type of each closure matches the return value inside the closure's body
+ 
+ 
  */
 
 let listOfAgesFromGuests = guestList.map { (aGuest: Guest) -> Int in
@@ -128,18 +157,38 @@ let listOfNamesFromGuests = guestList.map { (aGuest: Guest) -> String in
 }
 
 /*:
- ## Reduce
- This one is interesting. Reduce will, like all other HOFs, iterate through each element in the array but **the goal of reduce is to take the array and transform (or reduce) the array down into a single new type.**
- 
- For example, let's say you have an array of integers and you want to reduce the array into a sum, a single integer.
- 
+ ## `reduce(_:_:)`
+
+ `reduce` walks through a collection and **combines all elements into a single value**—for example, turning an array of numbers into their sum or product.
+
  ### Signature
- 
- `(Result, Element) -> Result` where `Element` is the same type as the array, and `Result` is the new type you want to reduce each element into.
- 
- The first argument is what the current reduced form looks like (always starts out nil). The second argument is an element from the array.
- 
- Let's try this out by writing the first example out:
+
+ ```swift
+ (Result, Element) -> Result
+ ```
+
+ * **`Element`** – the element type stored in the array.
+ * **`Result`** – the running total’s type (often—but not always—the same as `Element`).
+
+ The closure receives two parameters on every iteration:
+
+ 1. **Accumulator** (`Result`) – the value produced so far (you supply the initial value when you call `reduce`).
+ 2. **Current element** (`Element`) – the next item from the array.
+
+ The closure must return the **updated accumulator**, which `reduce` then feeds into the next cycle. After the last element, the final accumulator is returned.
+
+ Example – sum an array of `Int` values:
+
+ ```swift
+ let numbers   = [1, 2, 3, 4]
+ let totalSum  = numbers.reduce(0) { partialSum, next in
+     partialSum + next        // Result is Int
+ }
+ // totalSum == 10
+ ```
+
+ > **Tip:** Because `reduce` is non-mutating, the original array stays unchanged.
+
  */
 
 let randomNumbers = [2, 1, 6, 2, 8, 3, 10, -1]
@@ -149,16 +198,31 @@ let sumOfRandomNumbers = randomNumbers.reduce(0) { (sumSoFar, anInt) -> Int in
     return newSum
 }
 
+
 /*:
- Let's break this down a bit:
- 1. `sumSoFar` is our running tally of our sum
- 1. `anInt` represents an element from the array (in this case 2, 1, 6, 2, etc.)
- 1. For each element (`anInt`) in the array, we're going to add it to our running tally of our sum (`sumSoFar`) and save it (`newSum`)
- 1. `newSum` is an `Int` that gets returned after we've gone through every element in the array and calculated the sum
+
+ `reduce()` takes a starting value and a closure as two arguments. Notice that the closure follows the (). Swift allows this as part of the closure syntax.
  
- Pretty cool, right? We took an array and boiled it down into a single element! Let's apply this knowledge to our event that we've been working on. Arrays are great, but if we're looking at a guest list, a sentence is much more readable for most of us.
+Looking back at the map example. Notice that since there was only a single argument that is a closure, you could drop the ().
  
- Let's reduce an array of guests into a sentence, or `String`, that contains the names of all the guests separated by a comma:
+ ```
+ let listOfAgesFromGuests = guestList.map { (aGuest: Guest) -> Int in ... }
+ ```
+ 
+ This could have been written as:
+ 
+ ```
+ let listOfAgesFromGuests = guestList.map() { (aGuest: Guest) -> Int in ... }
+ ```
+ 
+ These are the same, the first takes advantage of some "syntactical sugar" that Swift offers.
+ 
+ In the case of the reduce example, there are two arguments, and the first argument needs to be in the ().
+ 
+ ```
+ let sumOfRandomNumbers = randomNumbers.reduce(0) { (sumSoFar, anInt) -> Int in ... }
+ ```
+ 
  */
 
 let namesCombined = guestList.reduce("") { (sentence, aGuest) -> String in
@@ -168,38 +232,38 @@ let namesCombined = guestList.reduce("") { (sentence, aGuest) -> String in
 }
 
 /*:
- ## You try!
+ ## CHALLENGE!
  
  Practice using the high order functions by completing the following:
  */
 
-//sort these numbers
+// sort these numbers
 let numbersToSort = [2, 4, 4, 2, 1, 0]
 
 
-//sort the guests by name
+// sort the guests by name
 let guestsToSort = [sam, eric, sara, charlie]
 
 
-//sort the guests by age, but in descending order (youngest at the front of the array)
+// sort the guests by age, but in descending order (youngest at the front of the array)
 
 
-//filter the guests to only include guests younger than 18 years
+// filter the guests to only include guests younger than 18 years
 
 
-//filter the numbers to only include even numbers
+// filter the numbers to only include even numbers
 let numbersToFilter = [2, 1, 1, 5, 6, 7, 10]
 
 
-//map the numbers to be double their values (e.g. 5 gets mapped to 10)
+// map the numbers to be double their values (e.g. 5 gets mapped to 10)
 let numbersToDouble = [2, 4, 6, 8]
 
 
-//map the numbers into strings
+// map the numbers into strings
 let numbersToMapIntoStrings = [2, 4, 5, 1, 2, 2]
 
 
-//reduce the numbers into a sum, but exclude negative numbers from the sum. Thus, your reduce closure should reduce this array to equal 10
+// reduce the numbers into a sum, but exclude negative numbers from the sum. Thus, your reduce closure should reduce this array to equal 10
 let numbersToSum = [-2, -5, -4, 5, -5, 5]
 
 
@@ -208,6 +272,7 @@ let numbersToSum = [-2, -5, -4, 5, -5, 5]
  
  But we can make it EVEN MORE efficient! In the next section we'll learn some shorthand for writing closures.
  */
+
 //: [Previous](@previous) | [Next](@next)
 
 

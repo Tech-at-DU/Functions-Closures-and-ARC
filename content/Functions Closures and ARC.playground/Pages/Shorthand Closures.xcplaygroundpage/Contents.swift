@@ -1,6 +1,6 @@
 /*:
  # Shorthand Closures
- So, closures can help us reduce code and store blocks of code to be executed later. But, the same closures we've been writing can be written using **Type Inferance.** Let's see how that look:
+ Closures help us reduce code and store blocks of code to be executed later. But, the same closures we've been writing can be written using **Type Inferance.** Let's see how that look:
 
  First let's set up our favorite `struct`:
  */
@@ -47,7 +47,7 @@ let eric = Guest(name: "Eric", age: 19)
 
 add(newGuest: eric) { (guestNumber: Int) in
     print("There are \(guestNumber - 1) guests ahead of me")
-    print("play rock music")
+    print("must play loud rock music")
 }
 
 /*:
@@ -98,6 +98,8 @@ add(newGuest: eric) { print("There are \($0 - 1) guests ahead of me") }
 
  We have one more section to go, let's finish strong with memory management!
  */
+
+
 
 //: [Previous](@previous) | [Next](@next)
 

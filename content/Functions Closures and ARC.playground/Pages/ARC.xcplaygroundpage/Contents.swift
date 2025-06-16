@@ -2,9 +2,9 @@
  # ARC: Memory Management
 
  ## Retain Counts
- Swift uses **Automatic Reference Counting, or ARC,** to manage when an instance is in kept in memory and when it gets deleted.
+ Swift uses **Automatic Reference Counting, or ARC,** to manage when an instance is kept in memory, and when it gets deleted.
 
- #How does it work
+ # How does it work
  Once an instance of a class is created, ARC will keep track of its **reference count, or retain count.** Let's look at an example:
 
  We create a class called Person and add an initizalizer, a deinit method, and a single property `name`.
@@ -31,15 +31,15 @@ class Person {
 let eric = Person(name: "Eric")
 
 /*:
- Since `eric` references the new instance, the retain count is now 1. Let's create another instance of `Person`
+ Since `eric` references the new instance, the retain count is now 1. Create another instance of `Person`
  */
 
 let jack = Person(name: "Jack")
 
 /*:
- Again, this new instance has a retain count of 1. Each instance has a retain count of 1 because each instance has one variable "pointing" at each instance.
+ Again, this new instance has a retain count of 1. Each instance has a retain count of 1 because each instance has one variable "pointing" to each instance.
 
- So now that we saw how to **increment** a retain count, let's see how we can decrement one.
+ Now that we saw how retain count is **incremented**, let's see how it is decremented.
 
  ## Decrementing a retain count
  We'll use the same two instances, `Person(name: "Eric")` and `Person(name: "Jack")`, and create a new variable and set it equal to `eric`.
@@ -48,17 +48,17 @@ let jack = Person(name: "Jack")
 var jacksBestFriend: Person? = eric
 
 /*:
- Any guesses on what the retain count is of the first instance?
+ The retain count of the first instance is now 2, `Person(name: "Eric")`, now has two variables pointing to it.
 
- It's 2. The first instance, `Person(name: "Eric")`, now has two variables pointing to it. How is this possible?
-
- On the previous line of code, we assign `jacksBestFriend` to equal `eric`. But, what happened under the hood is the variable, or pointer, `jacksBestFriend` now *points* to whatever `eric` *points to* which is the first instance, `Person(name: "Eric")`. Let's update `jacksBestFriend` to not point to `eric`:
+ We assign `jacksBestFriend` to equal `eric`. But, what happened under the hood is the variable, or pointer, `jacksBestFriend` now *points* to whatever `eric` *points to* which is the first instance, `Person(name: "Eric")`. Let's update `jacksBestFriend` to not point to `eric`:
  */
 
 jacksBestFriend = nil
 
 /*:
  Now the retain count for `Person(name: "Eric")` is back to 1 since `eric` still points to that instance. Overall, **the retain count for all instances depends on how many properties, variables, and constants are pointing to that instance.**
+ 
+ **When the retain count of an instance reahes zero the instance is removed from memory.**
 
  ## When do retain counts go to zero?
  A common place for an instance's retain count to go to zero is via a local variable. Let's take a look:
@@ -76,12 +76,10 @@ print("function call ends")
 
 /*:
  Look in the console and see that Bella is initalized after the function starts and deinitialized after the function ends.
+ 
+ Check the output in the console. Notice that "Bella" is deinitialized before the we see "function call ends". This happens because the `bella` var was declared inside of the `createPersonInstance` function which makes it a local variable. Local variables are removed when a function ends. When `bella` is created the retain count is 1, when `bella` is removed, the retain count goes to 0, and the instance is removed from memory.
 
- ![deinit](./deinit.png)
-
- This is because the **local variable is removed when the function that created the local variable fell out of scope.**
-
- Another common case is when you present a new view controller onto the screen a new instance of that view controller is initalized. But, when the screen goes away, by a back button for example, the view controller is then deinitialized.
+ Another common case is when you present a new view controller onto the screen a new instance of that view controller is initalized. When the screen goes away, by tapping the back button for example, the controller is deinitialized.
 
  ## Two Kinds of Types
  Types come in two varieties:
@@ -91,7 +89,7 @@ print("function call ends")
  We'll cover both of these in-depth, as there are important differences between the two. Let's start with Reference Type.
 
  ### Reference Types
- In Swift, there are `classes`, `structs`, and `enums`. **Classes are the only type that can be a reference type. All others, are value types.** What does this mean in our code?
+ In Swift, **Classes are the only type that can be a reference type. All others, are value types.** In Swift, Struct, Enum, and Array are all values types. What does this mean in our code?
 
  #### Functions, passed by value or pass by reference
  Let's look at the following code and see what's going on:
@@ -163,7 +161,7 @@ print(bankCustomer.name)
  ![danny value](./danny-diagram.png)
 
  ## Retain Cycles
- ARC has its common challenges, one is a retain cycle. A retain cycle occurs when two instances point at each other. Let's see how that looks:
+ ARC has its challenges, one is a retain cycle. A retain cycle occurs when two instances point at each other. Let's see how that looks:
 
  We have the following two classes:
 
@@ -183,7 +181,7 @@ print(bankCustomer.name)
 
  ### The problem
 
- Here in the following graph, both variables `john` and `unit4A` no longer point to the instances `Person(name: "John Appleseed")` and `Apartment(unit: "4A")`. But, notice the two instances still point to each other. **This is a problem, because each instance still has a retain count of 1 (instead of 0), therefore they haven't been deinitalized from memory.** In fact, both instances are unreachable:
+ Here in the following graph, both variables `john` and `unit4A` no longer point to the instances `Person(name: "John Appleseed")` and `Apartment(unit: "4A")`. But, notice the two instances still point to each other. **This is a problem, because each instance still has a retain count of 1 (instead of 0), therefore they haven't been removed from memory.** In fact, both instances are unreachable:
 
  ![retain cycle-2](./referenceCycle03_2x.png)
 
@@ -194,7 +192,7 @@ print(bankCustomer.name)
  So we've identified where to break the chain, but how can we do it? If only there was a weaker pointer type...
 
  ## Weak References
- Oh good, there is! **Weak pointers utilze the `weak` keyword to allow variables to point to an instance without increamenting its retain count. Since a weak variable does not increament the retain count, the instance the optional points to can be deinitialized, thus the variable can be `nil`.
+ Weak pointers utilze the `weak` keyword to allow variables to point to an instance **without** increamenting its retain count. Since a weak variable does not increament the retain count, the instance the optional points to can be deinitialized, thus the variable can be `nil`.
  - note: Any time a weak reference is used, this turns the variable into an `optional`. Weak variable and `optional` are considered synonymous.
 
  Let's try to fix our retain cycle using a weak variable:
@@ -233,10 +231,6 @@ print(bankCustomer.name)
 
  This gives us a solid foundation to build on as we continue to navigate the intricacies of building out projects in iOS! As you go through your MOB course, reflect on these fundamentals and see how you build off of them going forward.
 
- ## Feedback and Review - 2 minutes
- **We promise this won't take longer than 2 minutes!**
- 
- Please take a moment to rate your understanding of learning outcomes from this tutorial, and how we can improve it via our [tutorial feedback form](https://goo.gl/forms/hPZCYMoFxEEIUfEo1)
  */
 
 
